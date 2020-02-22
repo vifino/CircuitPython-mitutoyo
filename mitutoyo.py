@@ -30,7 +30,8 @@ Implementation Notes
 __repo__ = "https://github.com/vifino/CircuitPython-mitutoyo"
 __version__ = "1.0.0"
 
-class Digimatic():
+
+class Digimatic:
     """
     Mitutoyo Digimatic SPC implementation for CircuitPython.
 
@@ -41,7 +42,7 @@ class Digimatic():
     """
 
     def __init__(self, **args):
-        if"data" not in args:
+        if "data" not in args:
             raise "Missing `data` pin in arguments!"
         if "clock" not in args:
             raise "Missing `clock` pin in arguments!"
@@ -71,7 +72,7 @@ class Digimatic():
 
             bits[i] = data.value
 
-            if i == 0: # deassert req after first bit read, so we only get one response
+            if i == 0:  # deassert req after first bit read, so we only get one response
                 self._req(False)
 
             # wait for clock to go up again
@@ -79,24 +80,25 @@ class Digimatic():
                 continue
 
         # assemble nibbles
-        nibbles = bytearray(52/4)
-        for n in range(52/4): # iterate over each nibble
+        nibbles = bytearray(52 / 4)
+        for n in range(52 / 4):  # iterate over each nibble
             idx = n * 4
             nibbles[n] = (
-                (bits[idx + 0] << 0) +
-                (bits[idx + 1] << 1) +
-                (bits[idx + 2] << 2) +
-                (bits[idx + 3] << 3))
+                (bits[idx + 0] << 0)
+                + (bits[idx + 1] << 1)
+                + (bits[idx + 2] << 2)
+                + (bits[idx + 3] << 3)
+            )
 
         # parse preamble
         # TODO: check if this contains useful data.
         for n in range(4):
             if nibbles[n] != 15:
-                return None # invalid data
+                return None  # invalid data
 
         # sign
         if nibbles[4] != 0 and nibbles[4] != 8:
-            return None # invalid data
+            return None  # invalid data
         sign_pos = nibbles[4] == 0
 
         # parse bcd the lazy way
@@ -104,19 +106,20 @@ class Digimatic():
         number = int("".join([chr(0x30 + digit) for digit in bcd]))
 
         # decimal point
-        number = number / 10**nibbles[11]
+        number = number / 10 ** nibbles[11]
 
         # unit
         unit = "in" if nibbles[12] else "mm"
 
         value = number if sign_pos else -number
         if number == 0:
-            value = 0 # don't like negative zeros.
+            value = 0  # don't like negative zeros.
 
         return self.Reading(value, unit)
 
-    class Reading():
+    class Reading:
         """A Reading from a Mitutoyo Digimatic instrument."""
+
         def __init__(self, value, unit):
             self.value = value
             self.unit = unit
