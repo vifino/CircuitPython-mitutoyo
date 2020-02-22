@@ -13,27 +13,39 @@ Data used to implement this were Mitutoyo datasheets.
 Implementation Notes
 --------------------
 **Hardware:**
-* You need the `data` and `clock` pins - which are pin 2 and 3 on a Digimatic 10-pin cable - configured as inputs with pullup.
-* You need to connect the `req` pin to a NPN with a 10kΩ resistor, with the open collector output to `!req`.
-* Optionally, you can connect `ready` - pin 4 on a Digimatic 10-pin cable - as an input with a pullup to know when to read.
+* You need the `data` and `clock` pins configured as inputs with pullup.
+  They are pin 2 and 3 on a Digimatic 10-pin cable.
+* Connect the `req` pin to a NPN with a 10kΩ resistor and the open collector output to `!req`.
+  On a Digimatic 10-pin cable, `!req` is pin 5.
+* Optionally, you can connect `ready` as an input with a pullup to know when to read.
+  On a Digimatic 10-pin cable, `ready` is pin 4.
 
 **Software:**
-* CircuitPython 5.0 tested, older versions and MicroPython might work.
+* CircuitPython 5.0 tested, older versions and MicroPython might work, but I doubt it.
 
 """
 
 # TODO: vifino: acquire more Mitutoyo gear, it is beautiful.
 
-__repo__ = "https://github.com/vifino/circuitpython-mitutoyo"
+__repo__ = "https://github.com/vifino/CircuitPython-mitutoyo"
 __version__ = "1.0.0"
 
 class Digimatic():
+    """
+    Mitutoyo Digimatic SPC implementation for CircuitPython.
+
+    Parameters:
+    data (pin): data pin
+    clock (pin): clock pin
+    req (pin) or nreq (pin): normal or inverted data request pin
+    """
+
     def __init__(self, **args):
-        if not "data" in args:
+        if"data" not in args:
             raise "Missing `data` pin in arguments!"
-        if not "clock" in args:
+        if "clock" not in args:
             raise "Missing `clock` pin in arguments!"
-        if not "req" in args and not "nreq" in args:
+        if "req" not in args and "nreq" not in args:
             raise "Missing `req` or `nreq` in arguments!"
 
         self.pins = args
@@ -45,6 +57,7 @@ class Digimatic():
             self.pins["nreq"].value = not val
 
     def read(self):
+        """Read a value from the connected instrument."""
         clock = self.pins["clock"]
         data = self.pins["data"]
 
@@ -58,7 +71,7 @@ class Digimatic():
 
             bits[i] = data.value
 
-            if i == 0: # deassert req after first bit read, so we know we have a response, but don't get more.
+            if i == 0: # deassert req after first bit read, so we only get one response
                 self._req(False)
 
             # wait for clock to go up again
@@ -94,15 +107,16 @@ class Digimatic():
         number = number / 10**nibbles[11]
 
         # unit
-        unit = nibbles[12] and "in" or "mm"
+        unit = "in" if nibbles[12] else "mm"
 
-        value = sign_pos and number or -number
+        value = number if sign_pos else -number
         if number == 0:
             value = 0 # don't like negative zeros.
 
         return self.Reading(value, unit)
 
     class Reading():
+        """A Reading from a Mitutoyo Digimatic instrument."""
         def __init__(self, value, unit):
             self.value = value
             self.unit = unit
