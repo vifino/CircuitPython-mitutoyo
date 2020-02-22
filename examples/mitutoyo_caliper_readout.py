@@ -1,5 +1,6 @@
 # This is a quick example how to read values from Mitutoyo Calipers.
-# Assuming a Serpente board, with `req`, `clock`, `data` and `ready` connected to D0, D1, D2 and D3, respectively.
+# Assuming a Serpente board, with `req`, `clock`, `data` and `ready` connected to
+# D0, D1, D2 and D3, respectively.
 
 import board
 import digitalio
@@ -20,7 +21,7 @@ pin_ready.pull = digitalio.Pull.UP
 
 print("Hello! Press the read button on the Calipers to print the value!")
 
-meter = mitutoyo.Digimatic(clock = pin_clock, data = pin_data, req = pin_req)
+meter = mitutoyo.Digimatic(clock=pin_clock, data=pin_data, req=pin_req)
 
 while True:
     # wait until ready goes low
