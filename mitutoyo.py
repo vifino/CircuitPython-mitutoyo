@@ -15,14 +15,14 @@ Implementation Notes
 
 **Hardware:**
 
-- You need the `data` and `clock` pins configured as inputs with pullup.
+- You need the 'data' and 'clock' pins configured as inputs with pullup.
   - They are pin 2 and 3 on a Digimatic 10-pin cable.
 
-- Connect the `req` pin to a NPN with a 10kΩ resistor and the open collector output to `!req`.
-  - On a Digimatic 10-pin cable, `!req` is pin 5.
+- Connect the 'req' pin to a NPN with a 10kΩ resistor and the open collector output to '!req'.
+  - On a Digimatic 10-pin cable, '!req' is pin 5.
 
-- Optionally, you can connect `ready` as an input with a pullup to know when to read.
-  - On a Digimatic 10-pin cable, `ready` is pin 4.
+- Optionally, you can connect 'ready' as an input with a pullup to know when to read.
+  - On a Digimatic 10-pin cable, 'ready' is pin 4.
 
 **Software:**
 
@@ -36,13 +36,17 @@ __repo__ = "https://github.com/vifino/CircuitPython-mitutoyo"
 __version__ = "1.0.0"
 
 
+import digitalio
+
+
 class Digimatic:
     """
     Mitutoyo Digimatic SPC implementation for CircuitPython.
-    :param data: data pin (digitalio)
-    :param clock: clock pin (digitalio)
-    :param req: non-inverted data request pin (digitalio)
-    :param nreq: inverted data request pin (digitalio)
+    Provide either 'req' or 'nreq'. 'req' takes precedence.
+    :param ~microcontroller.Pin data: data pin
+    :param ~microcontroller.Pin clock: clock pin
+    :param ~microcontroller.Pin req: non-inverted data request pin
+    :param ~microcontroller.Pin nreq: inverted data request pin
     """
 
     def __init__(self, **args):
@@ -53,7 +57,18 @@ class Digimatic:
         if "req" not in args and "nreq" not in args:
             raise "Missing `req` or `nreq` in arguments!"
 
-        self.pins = args
+        pins = {}
+        for name, pin in args.items():
+            dio = digitalio.DigitalInOut(pin)
+            if name in ["req", "nreq"]:
+                dio.direction = digitalio.Direction.OUTPUT
+            else:
+                dio.direction = digitalio.Direction.INPUT
+                dio.pull = digitalio.Pull.UP
+
+            pins[name] = dio
+
+        self.pins = pins
 
     def _req(self, val):
         if "req" in self.pins:
@@ -63,8 +78,9 @@ class Digimatic:
 
     def read(self):
         """
-        Read a value from the connected instrument.
-        :return: Reading
+        Attempt to read a value from the connected instrument.
+        :return: A reading or none if data is unparsable
+        :rtype: self.Reading
         """
         clock = self.pins["clock"]
         data = self.pins["data"]
@@ -122,7 +138,7 @@ class Digimatic:
 
         value = number if sign_pos else -number
         if number == 0:
-            value = 0  # don't like negative zeros.
+            value = 0.0  # don't like negative zeros.
 
         return self.Reading(value, unit)
 
