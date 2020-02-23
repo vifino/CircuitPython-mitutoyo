@@ -2,11 +2,11 @@
 # Assuming a Serpente board, with `req`, `clock`, `data` and `ready` connected to
 # D0, D1, D2 and D3, respectively.
 
+import time
 import board
 import digitalio
 import mitutoyo
 
-import time
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
