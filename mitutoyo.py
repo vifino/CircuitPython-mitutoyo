@@ -12,16 +12,21 @@ Data used to implement this were Mitutoyo datasheets.
 
 Implementation Notes
 --------------------
+
 **Hardware:**
-* You need the `data` and `clock` pins configured as inputs with pullup.
-  They are pin 2 and 3 on a Digimatic 10-pin cable.
-* Connect the `req` pin to a NPN with a 10kΩ resistor and the open collector output to `!req`.
-  On a Digimatic 10-pin cable, `!req` is pin 5.
-* Optionally, you can connect `ready` as an input with a pullup to know when to read.
-  On a Digimatic 10-pin cable, `ready` is pin 4.
+
+- You need the `data` and `clock` pins configured as inputs with pullup.
+  - They are pin 2 and 3 on a Digimatic 10-pin cable.
+
+- Connect the `req` pin to a NPN with a 10kΩ resistor and the open collector output to `!req`.
+  - On a Digimatic 10-pin cable, `!req` is pin 5.
+
+- Optionally, you can connect `ready` as an input with a pullup to know when to read.
+  - On a Digimatic 10-pin cable, `ready` is pin 4.
 
 **Software:**
-* CircuitPython 5.0 tested, older versions and MicroPython might work, but I doubt it.
+
+- CircuitPython 5.0 tested, older versions and MicroPython should work, thanks to Adafruit Blinka.
 
 """
 
@@ -34,11 +39,10 @@ __version__ = "1.0.0"
 class Digimatic:
     """
     Mitutoyo Digimatic SPC implementation for CircuitPython.
-
-    Parameters:
-    data (pin): data pin
-    clock (pin): clock pin
-    req (pin) or nreq (pin): normal or inverted data request pin
+    :param data: data pin (digitalio)
+    :param clock: clock pin (digitalio)
+    :param req: non-inverted data request pin (digitalio)
+    :param nreq: inverted data request pin (digitalio)
     """
 
     def __init__(self, **args):
@@ -58,7 +62,10 @@ class Digimatic:
             self.pins["nreq"].value = not val
 
     def read(self):
-        """Read a value from the connected instrument."""
+        """
+        Read a value from the connected instrument.
+        :return: Reading
+        """
         clock = self.pins["clock"]
         data = self.pins["data"]
 
@@ -80,8 +87,8 @@ class Digimatic:
                 continue
 
         # assemble nibbles
-        nibbles = bytearray(52 / 4)
-        for n in range(52 / 4):  # iterate over each nibble
+        nibbles = bytearray(13)
+        for n in range(13):  # iterate over each nibble
             idx = n * 4
             nibbles[n] = (
                 (bits[idx + 0] << 0)
@@ -101,9 +108,11 @@ class Digimatic:
             return None  # invalid data
         sign_pos = nibbles[4] == 0
 
-        # parse bcd the lazy way
+        # convert bcd sequence to integer
+        number = 0
         bcd = nibbles[5:11]
-        number = int("".join([chr(0x30 + digit) for digit in bcd]))
+        for i in range(6):
+            number += bcd[i] * (10 ** (5 - i))
 
         # decimal point
         number = number / 10 ** nibbles[11]
