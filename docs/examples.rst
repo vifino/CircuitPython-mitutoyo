@@ -1,5 +1,5 @@
 Mitutoyo Caliper Readout
-------------
+------------------------
 
 This example prints a connected Caliper's value on the push of the ready button on the instrument.
 
