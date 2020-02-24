@@ -25,7 +25,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     # The project's main homepage.
-    url="https://github.com/vifino/CircuitPython_mitutoyo",
+    url="https://github.com/vifino/CircuitPython-mitutoyo",
     # Author details
     author='Adrian "vifino" Pistol',
     author_email="vifino@tty.sh",

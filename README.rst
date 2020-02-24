@@ -6,7 +6,7 @@
     :alt: Documentation Status
 
 .. image:: https://github.com/vifino/CircuitPython-mitutoyo/workflows/Build%20CI/badge.svg
-    :target: https://github.com/vifino/CircuitPython_mitutoyo/actions
+    :target: https://github.com/vifino/CircuitPython-mitutoyo/actions
     :alt: Build Status
 
 CircuitPython implementation of the Mitutoyo Digimatic SPC interface.
@@ -68,5 +68,5 @@ Contributing
 ============
 
 Contributions are welcome! Please read our `Code of Conduct
-<https://github.com/vifino/CircuitPython_mitutoyo/blob/master/CODE_OF_CONDUCT.md>`_
+<https://github.com/vifino/CircuitPython-mitutoyo/blob/master/CODE_OF_CONDUCT.md>`_
 before contributing to help this project stay welcoming.
