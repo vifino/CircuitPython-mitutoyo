@@ -2,6 +2,7 @@
 # Assuming a Serpente board, with `req`, `clock`, `data` and `ready` connected to
 # D0, D1, D2 and D3, respectively.
 
+import time
 import board
 import digitalio
 import mitutoyo
@@ -17,7 +18,7 @@ meter = mitutoyo.Digimatic(req=board.D0, clock=board.D1, data=board.D2)
 while True:
     # wait until ready goes low
     while pin_ready.value:
-        continue
+        time.sleep(0.1)
 
     reading = meter.read()
     if reading:
@@ -25,4 +26,4 @@ while True:
 
     # wait until ready goes up again to just get a single reading per press
     while not pin_ready.value:
-        continue
+        time.sleep(0.1)

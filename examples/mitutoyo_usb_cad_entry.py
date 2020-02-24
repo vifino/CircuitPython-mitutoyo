@@ -28,7 +28,7 @@ print("Ready.")
 while True:
     # wait until ready goes low
     while pin_ready.value:
-        continue
+        time.sleep(0.1)
 
     reading = meter.read()
     if reading:
@@ -37,4 +37,4 @@ while True:
 
     # wait until ready goes up again to just get a single reading per press
     while not pin_ready.value:
-        continue
+        time.sleep(0.1)
